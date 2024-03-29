@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../app/app.dart';
-import '../blocs/contacts_list_bloc/contacts_list_bloc.dart';
-import '../../../../services/services.dart';
-
-import '../../../../shared/widgets/initials_avatar.dart';
-
 import '../../../../core/extensions/extensions.dart';
+import '../../../../services/services.dart';
+import '../../../../shared/widgets/initials_avatar.dart';
 import '../../domain/entities/entities.dart';
 import '../blocs/blocs.dart';
+import '../blocs/contacts_list_bloc/contacts_list_bloc.dart';
 import '../widgets/widgets.dart';
 
 class ContactsListPage extends StatelessWidget {
@@ -27,6 +26,16 @@ class ContactsListPage extends StatelessWidget {
 
 class ContactsListView extends StatelessWidget {
   const ContactsListView({super.key});
+
+  void _onAddContactPressed(BuildContext context) {
+    final cities = context.read<ContactsListBloc>().state.cities;
+    Navigator.of(context)
+        .pushNamed(RoutePaths.addContact, arguments: cities)
+        .then(
+          (value) =>
+              context.read<ContactsListBloc>().add(ContactsListFetched()),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +55,7 @@ class ContactsListView extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final cities = context.read<ContactsListBloc>().state.cities;
-          Navigator.of(context)
-              .pushNamed(RoutePaths.addContact, arguments: cities)
-              .then(
-                (value) =>
-                    context.read<ContactsListBloc>().add(ContactsListFetched()),
-              );
-        },
+        onPressed: () => _onAddContactPressed(context),
         child: const Icon(Icons.add),
       ),
     );
@@ -152,10 +153,22 @@ class _ContactsListScrollView extends StatelessWidget {
           final contact = contacts[index];
 
           return ListTile(
-            title: Text(contact.name),
-            subtitle: Text('${contact.phoneNumber} • ${contact.city}'),
-            leading: InitialsAvatar(initial: contact.name),
-          );
+              title: Text(contact.name),
+              subtitle: Text('${contact.phoneNumber} • ${contact.city}'),
+              leading: InitialsAvatar(initial: contact.name),
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16.0)),
+                  ),
+                  builder: (_) {
+                    return ContactDetailSheet(contact: contact);
+                  },
+                );
+              });
         },
         childCount: contacts.length,
       ),

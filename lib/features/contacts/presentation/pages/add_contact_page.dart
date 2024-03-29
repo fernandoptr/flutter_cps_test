@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../widgets/widgets.dart';
 
 import '../../../../services/services.dart';
 import '../../../../shared/shared.dart';
@@ -64,6 +65,43 @@ class _AddContactViewState extends State<AddContactView> {
     _addressController.dispose();
   }
 
+  void _showCityPicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 300.0,
+          child: CupertinoPicker(
+            useMagnifier: true,
+            itemExtent: 40.0,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _cityController.text = widget.cities[index].name;
+              });
+            },
+            children: widget.cities.map((City city) {
+              return Center(child: Text(city.name));
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      context.read<AddContactBloc>().add(
+            AddContactSubmitted(
+              name: _name,
+              email: _emailController.text.trim(),
+              phoneNumber: _phoneNumberController.text.trim(),
+              city: _cityController.text,
+              address: _addressController.text.trim(),
+            ),
+          );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AddContactBloc, AddContactState>(
@@ -125,6 +163,7 @@ class _AddContactViewState extends State<AddContactView> {
           controller: _emailController,
           label: 'Email',
           hint: 'Enter your email',
+          keyboardType: TextInputType.emailAddress,
           prefixIcon: const Icon(Icons.email),
           validator: Validator.email,
         ),
@@ -133,6 +172,7 @@ class _AddContactViewState extends State<AddContactView> {
           controller: _phoneNumberController,
           label: 'Phone Number',
           hint: 'Enter your phone number',
+          keyboardType: TextInputType.phone,
           prefixIcon: const Icon(Icons.phone),
           validator: (value) => Validator.empty(value, field: 'phone number'),
         ),
@@ -160,107 +200,5 @@ class _AddContactViewState extends State<AddContactView> {
         ),
       ],
     );
-  }
-
-  void _showCityPicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: 300.0,
-          child: CupertinoPicker(
-            useMagnifier: true,
-            itemExtent: 40.0,
-            onSelectedItemChanged: (int index) {
-              setState(() {
-                _cityController.text = widget.cities[index].name;
-              });
-            },
-            children: widget.cities.map((City city) {
-              return Center(child: Text(city.name));
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      context.read<AddContactBloc>().add(
-            AddContactSubmitted(
-              name: _name,
-              email: _emailController.text.trim(),
-              phoneNumber: _phoneNumberController.text.trim(),
-              city: _cityController.text,
-              address: _addressController.text.trim(),
-            ),
-          );
-    }
-  }
-}
-
-class AddContactStateDialog extends StatelessWidget {
-  final AddContactState state;
-
-  const AddContactStateDialog({
-    super.key,
-    required this.state,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: _buildTitle(),
-      content: _buildContent(),
-      actions: _buildActions(context),
-    );
-  }
-
-  Widget? _buildTitle() {
-    if (state.status == AddContactStatus.loading) {
-      return const Text('Submitting Contact');
-    } else if (state.status == AddContactStatus.success) {
-      return const Text('Contact Added');
-    } else if (state.status == AddContactStatus.failure) {
-      return const Text('Submission Failed');
-    } else {
-      return null;
-    }
-  }
-
-  Widget? _buildContent() {
-    if (state.status == AddContactStatus.loading) {
-      return const LinearProgressIndicator();
-    } else if (state.status == AddContactStatus.success) {
-      return Text(
-        '${state.submittedContact?.name} has been added to your contacts',
-      );
-    } else if (state.status == AddContactStatus.failure) {
-      return Text(state.errorMessage ?? 'Something went wrong');
-    } else {
-      return null;
-    }
-  }
-
-  List<Widget> _buildActions(BuildContext context) {
-    if (state.status != AddContactStatus.loading) {
-      return [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-            if (state.status == AddContactStatus.success) {
-              Navigator.of(context).pop();
-            }
-          },
-          child: Text(
-            state.status == AddContactStatus.success ? 'OK' : 'Try Again',
-          ),
-        ),
-      ];
-    } else {
-      return [];
-    }
   }
 }

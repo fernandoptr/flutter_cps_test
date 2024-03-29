@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'app.dart';
 
 import '../core/themes/themes.dart';
 import '../core/utils/utils.dart';
 import '../features/contacts/presentation/pages/pages.dart';
+import 'app.dart';
 
 class AppCore extends StatelessWidget {
   const AppCore({super.key});

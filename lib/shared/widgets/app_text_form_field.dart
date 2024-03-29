@@ -5,6 +5,7 @@ class AppTextFormField extends StatelessWidget {
   final String label;
   final String hint;
   final bool readOnly;
+  final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final Widget? prefixIcon;
 
@@ -14,6 +15,7 @@ class AppTextFormField extends StatelessWidget {
     required this.label,
     required this.hint,
     this.readOnly = false,
+    this.keyboardType = TextInputType.text,
     this.validator,
     this.prefixIcon,
   });
@@ -25,7 +27,7 @@ class AppTextFormField extends StatelessWidget {
       autocorrect: false,
       readOnly: readOnly,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
