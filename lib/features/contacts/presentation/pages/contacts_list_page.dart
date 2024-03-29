@@ -12,13 +12,17 @@ class ContactsListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController searchController = TextEditingController();
+
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async =>
-            context.read<ContactsListBloc>().add(ContactsListFetched()),
+        onRefresh: () async {
+          searchController.clear();
+          context.read<ContactsListBloc>().add(ContactsListFetched());
+        },
         child: CustomScrollView(
           slivers: [
-            _ContactsListAppBar(),
+            _ContactsListAppBar(searchController: searchController),
             _buildBody(),
           ],
         ),
@@ -47,6 +51,10 @@ class ContactsListPage extends StatelessWidget {
 }
 
 class _ContactsListAppBar extends StatelessWidget {
+  final TextEditingController searchController;
+
+  const _ContactsListAppBar({required this.searchController});
+
   @override
   Widget build(BuildContext context) {
     return SliverAppBar.medium(
@@ -85,6 +93,7 @@ class _ContactsListAppBar extends StatelessWidget {
             vertical: 8.0,
           ),
           child: CupertinoSearchTextField(
+            controller: searchController,
             autocorrect: false,
             keyboardType: TextInputType.name,
             placeholder: 'Search contacts',
