@@ -1,8 +1,11 @@
-import '../../../../shared/shared.dart';
-import '../../domain/entities/entities.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../services/services.dart';
+import '../../../../shared/shared.dart';
+import '../../domain/entities/entities.dart';
+import '../blocs/blocs.dart';
 
 class AddContactPage extends StatelessWidget {
   final List<City> cities;
@@ -11,7 +14,10 @@ class AddContactPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AddContactView(cities: cities);
+    return BlocProvider(
+      create: (context) => getIt<AddContactBloc>(),
+      child: AddContactView(cities: cities),
+    );
   }
 }
 
@@ -60,32 +66,45 @@ class _AddContactViewState extends State<AddContactView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add Contact')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          reverse: true,
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(child: InitialsAvatar(initial: _name, size: 124.0)),
-                const SizedBox(height: 32.0),
-                _buildInputFields(),
-                const SizedBox(height: 64.0),
-              ],
+    return BlocListener<AddContactBloc, AddContactState>(
+      listener: (context, state) {
+        if (state.status != AddContactStatus.initial) {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return AddContactStateDialog(state: state);
+            },
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Add Contact')),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            reverse: true,
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(child: InitialsAvatar(initial: _name, size: 124.0)),
+                  const SizedBox(height: 32.0),
+                  _buildInputFields(),
+                  const SizedBox(height: 64.0),
+                ],
+              ),
             ),
           ),
         ),
+        persistentFooterButtons: [
+          ElevatedButton(
+            onPressed: _submitForm,
+            child: const Text('Add Contact'),
+          ),
+        ],
       ),
-      persistentFooterButtons: [
-        ElevatedButton(
-          onPressed: _submitForm,
-          child: const Text('Add Contact'),
-        ),
-      ],
     );
   }
 
@@ -125,6 +144,7 @@ class _AddContactViewState extends State<AddContactView> {
               controller: _cityController,
               label: 'City',
               hint: 'Select your city',
+              readOnly: true,
               prefixIcon: const Icon(Icons.location_city),
               validator: (value) => Validator.empty(value, field: 'city'),
             ),
@@ -167,12 +187,80 @@ class _AddContactViewState extends State<AddContactView> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text.trim();
-      String phoneNumber = _phoneNumberController.text.trim();
-      String city = _cityController.text;
-      String address = _addressController.text.trim();
+      context.read<AddContactBloc>().add(
+            AddContactSubmitted(
+              name: _name,
+              email: _emailController.text.trim(),
+              phoneNumber: _phoneNumberController.text.trim(),
+              city: _cityController.text,
+              address: _addressController.text.trim(),
+            ),
+          );
+    }
+  }
+}
 
-      // TODO: Submit contact
+class AddContactStateDialog extends StatelessWidget {
+  final AddContactState state;
+
+  const AddContactStateDialog({
+    super.key,
+    required this.state,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: _buildTitle(),
+      content: _buildContent(),
+      actions: _buildActions(context),
+    );
+  }
+
+  Widget? _buildTitle() {
+    if (state.status == AddContactStatus.loading) {
+      return const Text('Submitting Contact');
+    } else if (state.status == AddContactStatus.success) {
+      return const Text('Contact Added');
+    } else if (state.status == AddContactStatus.failure) {
+      return const Text('Submission Failed');
+    } else {
+      return null;
+    }
+  }
+
+  Widget? _buildContent() {
+    if (state.status == AddContactStatus.loading) {
+      return const LinearProgressIndicator();
+    } else if (state.status == AddContactStatus.success) {
+      return Text(
+        '${state.submittedContact?.name} has been added to your contacts',
+      );
+    } else if (state.status == AddContactStatus.failure) {
+      return Text(state.errorMessage ?? 'Something went wrong');
+    } else {
+      return null;
+    }
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    if (state.status != AddContactStatus.loading) {
+      return [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+            if (state.status == AddContactStatus.success) {
+              Navigator.of(context).pop();
+            }
+          },
+          child: Text(
+            state.status == AddContactStatus.success ? 'OK' : 'Try Again',
+          ),
+        ),
+      ];
+    } else {
+      return [];
     }
   }
 }

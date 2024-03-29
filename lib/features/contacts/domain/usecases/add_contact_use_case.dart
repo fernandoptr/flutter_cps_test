@@ -1,3 +1,4 @@
+import '../../../../core/utils/utils.dart';
 import '../entities/entities.dart';
 import '../repositories/contacts_repository.dart';
 
@@ -7,7 +8,7 @@ class AddContactUseCase {
   AddContactUseCase({required ContactsRepository repository})
       : _repository = repository;
 
-  Future<void> call(Contact contact) async {
-    await _repository.addContact(contact);
+  Future<Result<Contact, Exception>> call(Contact contact) {
+    return _repository.addContact(contact);
   }
 }

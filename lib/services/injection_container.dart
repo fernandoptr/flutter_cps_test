@@ -42,4 +42,8 @@ void setupDependencies() {
       getCitiesUseCase: getIt<GetCitiesUseCase>(),
     ),
   );
+
+  getIt.registerFactory<AddContactBloc>(
+    () => AddContactBloc(addContactUseCase: getIt<AddContactUseCase>()),
+  );
 }

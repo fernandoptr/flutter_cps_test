@@ -4,6 +4,7 @@ class AppTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hint;
+  final bool readOnly;
   final String? Function(String?)? validator;
   final Widget? prefixIcon;
 
@@ -12,6 +13,7 @@ class AppTextFormField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.hint,
+    this.readOnly = false,
     this.validator,
     this.prefixIcon,
   });
@@ -21,6 +23,8 @@ class AppTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       autocorrect: false,
+      readOnly: readOnly,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         labelText: label,

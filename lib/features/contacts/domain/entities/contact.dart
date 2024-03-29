@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Contact extends Equatable {
-  final String id;
+  final String? id;
   final String name;
   final String email;
   final String phoneNumber;
@@ -9,7 +9,7 @@ class Contact extends Equatable {
   final String address;
 
   const Contact({
-    required this.id,
+    this.id,
     required this.name,
     required this.email,
     required this.phoneNumber,

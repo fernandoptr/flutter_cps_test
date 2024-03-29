@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cps_test/features/contacts/presentation/blocs/contacts_list_bloc/contacts_list_bloc.dart';
+import '../blocs/contacts_list_bloc/contacts_list_bloc.dart';
 import '../../../../services/services.dart';
 
 import 'pages.dart';
@@ -51,10 +51,11 @@ class ContactsListView extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              fullscreenDialog: true,
               builder: (context) => AddContactPage(cities: cities),
             ),
-          );
+          ).then((_) {
+            context.read<ContactsListBloc>().add(ContactsListFetched());
+          });
         },
         child: const Icon(Icons.add),
       ),
@@ -73,7 +74,9 @@ class ContactsListView extends StatelessWidget {
               contacts: state.contacts,
             ),
           (ContactsListStatus.failure) => SliverFillRemaining(
-              child: Center(child: Text(state.errorMessage)),
+              child: Center(
+                child: Text(state.errorMessage ?? 'Something went wrong'),
+              ),
             ),
         };
       },

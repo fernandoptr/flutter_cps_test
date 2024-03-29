@@ -11,7 +11,7 @@ class ContactsListState extends Equatable {
   final bool isSortAscByName;
   final City? filteredCity;
 
-  final String errorMessage;
+  final String? errorMessage;
 
   const ContactsListState({
     required this.status,
@@ -20,7 +20,7 @@ class ContactsListState extends Equatable {
     required this.searchName,
     required this.isSortAscByName,
     required this.filteredCity,
-    required this.errorMessage,
+    this.errorMessage,
   });
 
   const ContactsListState.initial()
@@ -30,7 +30,7 @@ class ContactsListState extends Equatable {
         searchName = '',
         isSortAscByName = true,
         filteredCity = null,
-        errorMessage = '';
+        errorMessage = null;
 
   ContactsListState copyWith({
     ContactsListStatus? status,

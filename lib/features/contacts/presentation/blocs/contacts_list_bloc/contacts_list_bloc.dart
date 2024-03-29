@@ -37,8 +37,8 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
     ));
 
     try {
-      final contactResult = await _getContactsUseCase();
-      _allContacts = _processContactsResult(contactResult);
+      final contactsResult = await _getContactsUseCase();
+      _allContacts = _processContactsResult(contactsResult);
 
       final citiesResult = await _getCitiesUseCase();
       final cities = _processCitiesResult(citiesResult);
