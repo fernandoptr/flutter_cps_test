@@ -1,5 +1,4 @@
 import '../../../../core/utils/utils.dart';
-
 import '../entities/entities.dart';
 import '../repositories/contacts_repository.dart';
 
