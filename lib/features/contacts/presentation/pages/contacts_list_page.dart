@@ -1,6 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cps_test/features/contacts/presentation/blocs/contacts_list_bloc/contacts_list_bloc.dart';
+import '../../../../services/services.dart';
+
+import 'pages.dart';
+import '../../../../shared/widgets/initials_avatar.dart';
 
 import '../../../../core/extensions/extensions.dart';
 import '../../domain/entities/entities.dart';
@@ -9,6 +14,19 @@ import '../widgets/widgets.dart';
 
 class ContactsListPage extends StatelessWidget {
   const ContactsListPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) =>
+          getIt<ContactsListBloc>()..add(ContactsListFetched()),
+      child: const ContactsListView(),
+    );
+  }
+}
+
+class ContactsListView extends StatelessWidget {
+  const ContactsListView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +44,19 @@ class ContactsListPage extends StatelessWidget {
             _buildBody(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final cities = context.read<ContactsListBloc>().state.cities;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => AddContactPage(cities: cities),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -122,9 +153,7 @@ class _ContactsListScrollView extends StatelessWidget {
           return ListTile(
             title: Text(contact.name),
             subtitle: Text('${contact.phoneNumber} • ${contact.city}'),
-            leading: CircleAvatar(
-              child: Text(contact.name[0].toUpperCase()),
-            ),
+            leading: InitialsAvatar(initial: contact.name),
           );
         },
         childCount: contacts.length,
