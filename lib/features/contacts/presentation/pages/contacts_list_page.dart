@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/extensions/extensions.dart';
 import '../../domain/entities/entities.dart';
-
 import '../blocs/blocs.dart';
 import '../widgets/widgets.dart';
 
@@ -14,9 +14,8 @@ class ContactsListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async {
-          context.read<ContactsListBloc>().add(ContactsListFetched());
-        },
+        onRefresh: () async =>
+            context.read<ContactsListBloc>().add(ContactsListFetched()),
         child: CustomScrollView(
           slivers: [
             _ContactsListAppBar(),
@@ -59,14 +58,24 @@ class _ContactsListAppBar extends StatelessWidget {
       stretch: true,
       actions: [
         BlocBuilder<ContactsListBloc, ContactsListState>(
-          builder: (context, state) {
-            return SortByNameToggler(
-                isSortAscByName: state.isSortAscByName,
-                onSortByNameToggled: () => context
-                    .read<ContactsListBloc>()
-                    .add(ContactsListSortByNameToggled()));
-          },
-        )
+          builder: (context, state) => SortByNameToggler(
+            isSortAscByName: state.isSortAscByName,
+            onSortByNameToggled: () => context
+                .read<ContactsListBloc>()
+                .add(ContactsListSortByNameToggled()),
+          ),
+        ),
+        BlocBuilder<ContactsListBloc, ContactsListState>(
+          builder: (context, state) => CityFilterPopupMenuButton(
+            cityName: state.filteredCity?.name,
+            cities: state.cities,
+            onCitySelected: (city) {
+              context
+                  .read<ContactsListBloc>()
+                  .add(ContactsListCityFilterSelected(city));
+            },
+          ),
+        ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -100,6 +109,7 @@ class _ContactsListScrollView extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           final contact = contacts[index];
+
           return ListTile(
             title: Text(contact.name),
             subtitle: Text('${contact.phoneNumber} • ${contact.city}'),

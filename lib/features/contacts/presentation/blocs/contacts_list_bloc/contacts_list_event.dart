@@ -19,3 +19,12 @@ class ContactsListSearchTextChanged extends ContactsListEvent {
 }
 
 class ContactsListSortByNameToggled extends ContactsListEvent {}
+
+class ContactsListCityFilterSelected extends ContactsListEvent {
+  final City city;
+
+  const ContactsListCityFilterSelected(this.city);
+
+  @override
+  List<Object> get props => [city];
+}

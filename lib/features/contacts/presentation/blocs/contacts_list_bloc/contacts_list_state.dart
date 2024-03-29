@@ -9,6 +9,7 @@ class ContactsListState extends Equatable {
 
   final String searchName;
   final bool isSortAscByName;
+  final City? filteredCity;
 
   final String errorMessage;
 
@@ -18,6 +19,7 @@ class ContactsListState extends Equatable {
     required this.cities,
     required this.searchName,
     required this.isSortAscByName,
+    required this.filteredCity,
     required this.errorMessage,
   });
 
@@ -27,6 +29,7 @@ class ContactsListState extends Equatable {
         cities = const <City>[],
         searchName = '',
         isSortAscByName = true,
+        filteredCity = null,
         errorMessage = '';
 
   ContactsListState copyWith({
@@ -35,6 +38,7 @@ class ContactsListState extends Equatable {
     List<City>? cities,
     String? searchName,
     bool? isSortAscByName,
+    City? filteredCity,
     String? errorMessage,
   }) {
     return ContactsListState(
@@ -43,6 +47,7 @@ class ContactsListState extends Equatable {
       cities: cities ?? this.cities,
       searchName: searchName ?? this.searchName,
       isSortAscByName: isSortAscByName ?? this.isSortAscByName,
+      filteredCity: filteredCity,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -54,6 +59,7 @@ class ContactsListState extends Equatable {
         cities,
         searchName,
         isSortAscByName,
+        filteredCity,
         errorMessage,
       ];
 

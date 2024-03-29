@@ -22,33 +22,32 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
     on<ContactsListFetched>(_onContactsListFetched);
     on<ContactsListSearchTextChanged>(_onContactsListSearchTextChanged);
     on<ContactsListSortByNameToggled>(_onContactsListSortByNameToggled);
+    on<ContactsListCityFilterSelected>(_onContactsListCityFilterSelected);
   }
 
   Future<void> _onContactsListFetched(
     ContactsListFetched event,
     Emitter<ContactsListState> emit,
   ) async {
-    emit(state.copyWith(status: ContactsListStatus.loading));
+    emit(state.copyWith(
+      status: ContactsListStatus.loading,
+      searchName: '',
+      isSortAscByName: true,
+      filteredCity: null,
+    ));
 
     try {
       final contactResult = await _getContactsUseCase();
-      _allContacts = switch (contactResult) {
-        Success(data: final data) => _sortContactsByName(data, true),
-        Failure(exception: final exception) => throw exception,
-      };
+      _allContacts = _processContactsResult(contactResult);
 
       final citiesResult = await _getCitiesUseCase();
-      final cities = switch (citiesResult) {
-        Success(data: final data) => _sortCitiesByName(data),
-        Failure(exception: final exception) => throw exception,
-      };
+      final cities = _processCitiesResult(citiesResult);
 
       emit(
         state.copyWith(
           status: ContactsListStatus.success,
           contacts: _allContacts,
           cities: cities,
-          searchName: '',
         ),
       );
     } catch (e) {
@@ -63,14 +62,17 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
     ContactsListSearchTextChanged event,
     Emitter<ContactsListState> emit,
   ) {
-    final searchedContacts =
-        _searchContactsByName(_allContacts, event.searchName);
-    final sortedContacts =
-        _sortContactsByName(searchedContacts, state.isSortAscByName);
+    final contacts = _updateContacts(
+      contacts: _allContacts,
+      searchName: event.searchName,
+      isAscending: state.isSortAscByName,
+      filteredCity: state.filteredCity,
+    );
 
     emit(state.copyWith(
-      contacts: sortedContacts,
+      contacts: contacts,
       searchName: event.searchName,
+      filteredCity: state.filteredCity,
     ));
     return;
   }
@@ -79,16 +81,58 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
     ContactsListSortByNameToggled event,
     Emitter<ContactsListState> emit,
   ) {
-    final sortedContacts =
-        _sortContactsByName(state.contacts, !state.isSortAscByName);
+    final contacts = _updateContacts(
+      contacts: state.contacts,
+      searchName: state.searchName,
+      isAscending: !state.isSortAscByName,
+      filteredCity: state.filteredCity,
+    );
 
     emit(state.copyWith(
-      contacts: sortedContacts,
+      contacts: contacts,
       isSortAscByName: !state.isSortAscByName,
+      filteredCity: state.filteredCity,
     ));
   }
 
-  List<Contact> _sortContactsByName(List<Contact> contacts, bool isAscending) {
+  void _onContactsListCityFilterSelected(
+    ContactsListCityFilterSelected event,
+    Emitter<ContactsListState> emit,
+  ) {
+    final contacts = _updateContacts(
+      contacts: _allContacts,
+      searchName: state.searchName,
+      isAscending: state.isSortAscByName,
+      filteredCity: event.city,
+    );
+
+    emit(
+      state.copyWith(
+        contacts: contacts,
+        filteredCity: event.city,
+      ),
+    );
+  }
+
+  List<Contact> _processContactsResult(
+      Result<List<Contact>, Exception> result) {
+    return switch (result) {
+      Success(data: final data) => _sortContactsByName(data),
+      Failure(exception: final exception) => throw exception,
+    };
+  }
+
+  List<City> _processCitiesResult(Result<List<City>, Exception> result) {
+    return switch (result) {
+      Success(data: final data) => _sortCitiesByName(data),
+      Failure(exception: final exception) => throw exception,
+    };
+  }
+
+  List<Contact> _sortContactsByName(
+    List<Contact> contacts, {
+    bool isAscending = true,
+  }) {
     contacts.sort(
       (a, b) => isAscending
           ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
@@ -113,5 +157,29 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
                   searchName.toLowerCase(),
                 ))
             .toList();
+  }
+
+  List<Contact> _filterContactsByCity(
+      List<Contact> contacts, City? selectedCity) {
+    return selectedCity == null
+        ? contacts
+        : contacts
+            .where((contact) =>
+                contact.city.toLowerCase() == selectedCity.name.toLowerCase())
+            .toList();
+  }
+
+  List<Contact> _updateContacts({
+    required List<Contact> contacts,
+    String? searchName,
+    required bool isAscending,
+    City? filteredCity,
+  }) {
+    var updatedContacts = _filterContactsByCity(contacts, filteredCity);
+    updatedContacts = _searchContactsByName(updatedContacts, searchName ?? '');
+    updatedContacts =
+        _sortContactsByName(updatedContacts, isAscending: isAscending);
+
+    return updatedContacts;
   }
 }
