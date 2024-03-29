@@ -2,8 +2,7 @@
 
 ## Demo
 
-
-Uploading Simulator Screen Recording - iPhone 14 - 2024-03-29 at 23.07.00.mp4…
+https://github.com/fernandoptr/flutter_cps_test/assets/80305970/a583d527-2577-45bc-9140-506b73f8e873
 
 
 ## How to Use
