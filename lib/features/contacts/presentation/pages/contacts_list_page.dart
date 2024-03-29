@@ -16,7 +16,7 @@ class ContactsListPage extends StatelessWidget {
         },
         child: CustomScrollView(
           slivers: [
-            _buildAppBar(context),
+            _buildAppBar(),
             _buildBody(),
           ],
         ),
@@ -24,12 +24,8 @@ class ContactsListPage extends StatelessWidget {
     );
   }
 
-  ContactsListAppBar _buildAppBar(BuildContext context) {
-    return ContactsListAppBar(
-      searchTextChanged: (p0) => context
-          .read<ContactsListBloc>()
-          .add(ContactsListSearchTextChanged(p0)),
-    );
+  ContactsListAppBar _buildAppBar() {
+    return const ContactsListAppBar();
   }
 
   BlocBuilder<ContactsListBloc, ContactsListState> _buildBody() {

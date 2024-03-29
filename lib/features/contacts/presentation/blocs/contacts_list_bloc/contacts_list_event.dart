@@ -17,3 +17,5 @@ class ContactsListSearchTextChanged extends ContactsListEvent {
   @override
   List<Object> get props => [searchName];
 }
+
+class ContactsListSortByNameToggled extends ContactsListEvent {}

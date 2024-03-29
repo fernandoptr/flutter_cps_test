@@ -21,6 +21,7 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
         super(const ContactsListState.initial()) {
     on<ContactsListFetched>(_onContactsListFetched);
     on<ContactsListSearchTextChanged>(_onContactsListSearchTextChanged);
+    on<ContactsListSortByNameToggled>(_onContactsListSortByNameToggled);
   }
 
   Future<void> _onContactsListFetched(
@@ -51,12 +52,10 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
         ),
       );
     } catch (e) {
-      emit(
-        state.copyWith(
-          status: ContactsListStatus.failure,
-          errorMessage: e.toString(),
-        ),
-      );
+      emit(state.copyWith(
+        status: ContactsListStatus.failure,
+        errorMessage: e.toString(),
+      ));
     }
   }
 
@@ -64,24 +63,37 @@ class ContactsListBloc extends Bloc<ContactsListEvent, ContactsListState> {
     ContactsListSearchTextChanged event,
     Emitter<ContactsListState> emit,
   ) {
-    final searchedContacts = _searchContactsByName(
-      _allContacts,
-      event.searchName,
-    );
+    final searchedContacts =
+        _searchContactsByName(_allContacts, event.searchName);
+    final sortedContacts =
+        _sortContactsByName(searchedContacts, state.isSortAscByName);
 
-    emit(
-      state.copyWith(
-        contacts: searchedContacts,
-        searchName: event.searchName,
-      ),
-    );
+    emit(state.copyWith(
+      contacts: sortedContacts,
+      searchName: event.searchName,
+    ));
     return;
   }
 
+  void _onContactsListSortByNameToggled(
+    ContactsListSortByNameToggled event,
+    Emitter<ContactsListState> emit,
+  ) {
+    final sortedContacts =
+        _sortContactsByName(state.contacts, !state.isSortAscByName);
+
+    emit(state.copyWith(
+      contacts: sortedContacts,
+      isSortAscByName: !state.isSortAscByName,
+    ));
+  }
+
   List<Contact> _sortContactsByName(List<Contact> contacts, bool isAscending) {
-    contacts.sort((a, b) => isAscending
-        ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
-        : b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+    contacts.sort(
+      (a, b) => isAscending
+          ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
+          : b.name.toLowerCase().compareTo(a.name.toLowerCase()),
+    );
     return contacts;
   }
 
