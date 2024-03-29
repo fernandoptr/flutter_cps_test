@@ -6,5 +6,5 @@ abstract class ContactsRepository {
 
   Future<Result<List<Contact>, Exception>> getContacts();
 
-  Future<void> addContact(Contact contact);
+  Future<Result<Contact, Exception>> addContact(Contact contact);
 }
