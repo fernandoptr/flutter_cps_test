@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
+import 'services/services.dart';
+
 class AppBlocObserver extends BlocObserver {
   @override
   void onCreate(BlocBase bloc) {
@@ -49,7 +51,7 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
 
   Bloc.observer = AppBlocObserver();
 
-  // setupDependencies();
+  setupDependencies();
 
   runApp(await builder());
 }
