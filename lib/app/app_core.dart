@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app.dart';
 
 import '../core/themes/themes.dart';
 import '../core/utils/utils.dart';
@@ -13,6 +14,8 @@ class AppCore extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: Constants.appName,
       theme: AppTheme.light,
+      onGenerateRoute: AppRouter.onGenerateRoute,
+      initialRoute: RoutePaths.home,
       home: const ContactsListPage(),
     );
   }

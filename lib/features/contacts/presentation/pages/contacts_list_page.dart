@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/app.dart';
 import '../blocs/contacts_list_bloc/contacts_list_bloc.dart';
 import '../../../../services/services.dart';
 
-import 'pages.dart';
 import '../../../../shared/widgets/initials_avatar.dart';
 
 import '../../../../core/extensions/extensions.dart';
@@ -48,14 +48,12 @@ class ContactsListView extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           final cities = context.read<ContactsListBloc>().state.cities;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddContactPage(cities: cities),
-            ),
-          ).then((_) {
-            context.read<ContactsListBloc>().add(ContactsListFetched());
-          });
+          Navigator.of(context)
+              .pushNamed(RoutePaths.addContact, arguments: cities)
+              .then(
+                (value) =>
+                    context.read<ContactsListBloc>().add(ContactsListFetched()),
+              );
         },
         child: const Icon(Icons.add),
       ),
