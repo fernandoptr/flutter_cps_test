@@ -1,5 +1,4 @@
 import '../../../../core/utils/result.dart';
-
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/contacts_repository.dart';
 import '../datasources/contacts_remote_data_source.dart';
